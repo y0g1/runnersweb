@@ -2,6 +2,7 @@
 
 /* Directives */
 
+var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
 
 angular.module('app.directives', []).
   directive('appVersion', ['version', function(version) {
@@ -37,7 +38,6 @@ angular.module('app.directives', []).
             }
         };
     }])
-
     .directive('ngBindHtmlUnsafe', [function() {
         return function(scope, element, attr) {
             element.addClass('ng-binding').data('$binding', attr.ngBindHtmlUnsafe);
@@ -45,4 +45,20 @@ angular.module('app.directives', []).
                 element.html(value || '');
             });
         }
-    }]);
+    }])
+    .directive('smartFloat', function() {
+        return {
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$parsers.unshift(function(viewValue) {
+                    if (FLOAT_REGEXP.test(viewValue)) {
+                        ctrl.$setValidity('float', true);
+                        return parseFloat(viewValue.replace(',', '.'));
+                    } else {
+                        ctrl.$setValidity('float', false);
+                        return undefined;
+                    }
+                });
+            }
+        };
+    });

@@ -16,7 +16,7 @@ angular.module('app.controllers', []).
             if(data.state == 0) {
                 $scope.latestPosts = data.res;
             } else {
-                ///TODO: error handling
+                toastr.error(data.message);
             }
         });
 
@@ -25,12 +25,85 @@ angular.module('app.controllers', []).
             if(data.state == 0) {
                 $scope.upcomingRuns = data.res;
             } else {
-                ///TODO: error handling
+                toastr.error(data.message);
             }
         });
 
+
+        var resetPost = function() {
+            $scope.post = {
+                duration : new Date(0,0,0,0,0,0,0),
+                message : '',
+                location : null,
+                distance: ''
+            };
+        }
+
+        resetPost();
+
+
+
         $scope.getTowns = function(value) {
             return $http.get('/api/location/'+value).then(function(response){ return response.data; });
+        };
+
+        $scope.showFullForm = function() {
+            $('.hp-post-details').addClass('active');
+            $('.hp-post-message').addClass('active');
+        };
+
+        $scope.cancelPost = function() {
+            $('.hp-post-details').removeClass('active');
+            $('.hp-post-message').removeClass('active');
+
+            resetPost();
+        };
+
+        $scope.addPost = function(post) {
+
+
+            //console.log($scope.post);
+            var data = {};
+
+            data.duration = post.duration.getHours()*3600 + post.duration.getMinutes()*60 + post.duration.getSeconds();
+            data.message = post.message;
+            data.distance = post.distance * 1000;
+            if( post.location ) {
+                data.location = post.location.id;
+            }
+
+
+            $http.post('/post/add', data).success( function(ret) {
+
+                if(ret.state == 0) {
+                    var url = '/post/list/global/1';
+
+                    if(Auth.isLoggedIn()) {
+                        url = '/post/list/friends/1';
+                    }
+
+                    $http.get(url).success(function(data) {
+                        if(data.state == 0) {
+                            $scope.latestPosts = data.res;
+                            toastr.success('[[[Post has been added succesfully]]]');
+                        } else {
+                            toastr.error(data.message);
+                        }
+                    });
+                    resetPost();
+                } else {
+                    toastr.error(ret.message);
+                }
+
+            }).error( function() {
+                    toastr.error('[[[There was a problem adding your post. Please try again.]]]');
+            });
+
+            console.log(data);
+
+//            if(success) {
+//
+//            }
         };
 
     }]).
@@ -69,7 +142,7 @@ angular.module('app.controllers', []).
             if(data.state == 0) {
                 $scope.upcomingRuns = data.res;
             } else {
-                ///TODO: error handling
+                toastr.error(data.message);
             }
         });
     }]).

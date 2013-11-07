@@ -84,9 +84,12 @@ app.get('/', function(req,res) {
 
 app.get('/post/list/global/:page', function(req,res) {
 
-    db.query('SELECT post.id, post.when, member_id, member.first_name, member.last_name, SUBSTRING_INDEX(post.message," ", 40) as message ' +
+    db.query('SELECT post.id, post.when, post.member_id, member.first_name, member.last_name, SUBSTRING_INDEX(post.message," ", 40) as message, post.location_id, location.town, country.name as country_name, workout.duration, workout.distance ' +
         'FROM post ' +
         'JOIN member ON (member.id=post.member_id) ' +
+        'LEFT JOIN workout ON (post.workout_id=workout.id) ' +
+        'LEFT JOIN location ON (post.location_id=location.id) ' +
+        'LEFT JOIN country ON (location.country_id=country.id) ' +
         'ORDER BY id DESC ' +
         'LIMIT 20 OFFSET '+(20*(req.params.page-1)), function(err, rows, fields) {
             if (err) throw err;
@@ -99,10 +102,13 @@ app.get('/post/list/friends/:page', function(req,res) {
     if( typeof req.session.member == 'undefined' && req.session.member != null) {
         res.send({state: 1, message: res.__('Please sign in or register first')});
     } else {
-        var query = 'SELECT post.id, post.when, post.member_id, member.first_name, member.last_name, SUBSTRING_INDEX(post.message," ", 40) as message ' +
+        var query = 'SELECT post.id, post.when, post.member_id, member.first_name, member.last_name, SUBSTRING_INDEX(post.message," ", 40) as message, post.location_id, location.town, country.name as country_name, workout.duration, workout.distance  ' +
             'FROM post ' +
             'JOIN member ON (member.id=post.member_id) ' +
+            'LEFT JOIN workout ON (post.workout_id=workout.id) ' +
             'LEFT JOIN following ON (followed_member_id=post.member_id AND follower_member_id='+req.session.member.id+') ' +
+            'LEFT JOIN location ON (post.location_id=location.id) ' +
+            'LEFT JOIN country ON (location.country_id=country.id) ' +
             'WHERE following.id IS NOT NULL OR post.member_id = ' + req.session.member.id + ' ' +
             'ORDER BY post.id DESC ' +
             'LIMIT 20 OFFSET '+(20*(req.params.page-1));
@@ -116,6 +122,61 @@ app.get('/post/list/friends/:page', function(req,res) {
             res.send({res: rows, state: 0});
         });
     }
+});
+
+app.post('/post/add', function(req,res) {
+
+    if( typeof req.session.member == 'undefined' && req.session.member != null) {
+        res.send({state: 1, message: res.__('Please sign in or register first')});
+    } else {
+
+        var addWorkout = function(form, callback) {
+                var location = parseInt(form.location) == 0 ? 'NULL' : parseInt(form.location),
+                    distance = parseInt(form.distance) == 0 ? 'NULL' : parseInt(form.distance),
+                    duration = parseInt(form.duration) == 0 ? 'NULL' : parseInt(form.duration);
+
+                //var query = 'INSERT INTO workout (`when`, distance, duration, member_id, location_id) VALUES (NOW(), '+distance+','+duration+', '+req.session.member.id+','+location+')';
+                var query = 'INSERT INTO workout SET ?';
+
+                if(debugging) {
+                    console.log(query);
+                }
+                db.query(query, {member_id:req.session.member.id, when:new Date(), distance: form.distance, location_id:form.location, duration:form.duration}, function(err, rows, fields) {
+                    console.log(err);
+
+                    var query = 'SELECT LAST_INSERT_ID() as workoutId';
+                    if(debugging) {
+                        console.log(query);
+                    }
+                    db.query(query, function(err, rows, fields) {
+                        console.log(err);
+                        if(typeof callback != 'undefined') {
+                            callback(rows[0].workoutId);
+                        }
+                    });
+                });
+            },
+
+            addPost = function(workoutId) {
+
+                var query = 'INSERT INTO post SET ?';
+                if(debugging) {
+                    console.log(query);
+                }
+                db.query(query, {member_id:req.session.member.id, message:req.body.message, workout_id:workoutId, location_id:req.body.location, when:new Date()}, function(err, rows, fields) {
+                    console.log(err);
+                    res.send({state: 0});
+                });
+            }
+
+        if( parseInt(req.body.distance) > 0 && parseInt(req.body.duration) > 0) {
+            addWorkout(req.body, addPost)
+        } else {
+            addPost();
+        }
+
+    }
+
 });
 
 app.get('/events/upcoming/short', function(req,res) {

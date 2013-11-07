@@ -1,58 +1,62 @@
 <div class="row">
-    <div class="col-xs-8">
+    <div class="span8">
 
-
-        <form role="form" >
-            <div class="form-group">
-                <textarea class="form-control" ng-model="post.message" placeholder="[[[How was your running today?]]]"></textarea>
-            </div>
-            <div class="form-group" style="height:0px;">
-                <label for="distance" class="col-xs-2 control-label">[[[Distance]]]</label>
-                <div class="col-sm-10">
-                    <input class="form-control" id="distance" ng-model="post.distance" placeholder="[[[Distance in km]]]">
+        <div class="row">
+            <form class="form-horizontal" class="hp" ng-submit="addPost(post)" >
+                <div class="control-group">
+                    <textarea required class="form-control span8 hp-post-message" ng-focus="showFullForm()" ng-model="post.message" placeholder="[[[How was your running today?]]]"></textarea>
                 </div>
-            </div>
-            <div class="form-group">
-                <label  class="col-xs-2 control-label">[[[Duration]]]</label>
-                <div class="col-sm-10">
-
-                    <div ng-model="post.duration" class="well well-small bootstrap-timepicker" style="display:inline-block;">
-                        <timepicker hour-step="5" minute-step="1" show-seconds="true" show-meridian="false"></timepicker>
+                <div class="hp-post-details">
+                    <div class="control-group" style="height:0px;">
+                        <label for="distance" class="control-label">[[[Distance]]]</label>
+                        <div class="controls">
+                            <input smart-float type="text" id="distance" ng-model="post.distance" placeholder="[[[Distance in km]]]">
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="control-group">
+                        <label  class="control-label">[[[Duration]]]</label>
+                        <div class="controls">
+                            <div ng-model="post.duration" class="bootstrap-timepicker" style="display:inline-block;">
+                                <timepicker hour-step="1" minute-step="1" show-seconds="true" show-meridian="false"></timepicker>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="control-group">
+                        <label for="location" class="control-label">[[[Town]]]</label>
+                        <div class="controls">
+                            <input type="text" id="location" ng-model="post.location"  typeahead-editable="false" typeahead-wait-ms="500" typeahead="location as location.town for location in getTowns($viewValue)" placeholder="[[[town name]]]">
+                        </div>
                     </div>
 
+                    <div class="row">
 
+                            <button type="submit" ng-disabled="form.$invalid || isUnchanged(user)" class="btn btn-primary pull-right">[[[Publish]]]</button>
+                            <a ng-click="cancelPost()" class="btn btn-link pull-right">[[[Cancel]]]</a>
+                    </div>
                 </div>
+            </form>
+        </div>
+
+        <div class="row">
+            <h3>[[[Latest entries]]]</h3>
+            <div ng-repeat="post in latestPosts">
+                <h4><span class="glyphicon glyphicon-calendar"></span> {{ post.when }}</h4>
+                <span class="glyphicon glyphicon-user"></span> <em>{{post.first_name}} {{ post.last_name }}</em>
+
+                <div ng-show="post.duration">[[[ran]]] {{ post.distance }} [[[meters]]] [[[in]]] {{ post.duration }} [[[seconds]]]</div>
+                <div ng-show="post.town">[[[in]]] {{post.town}} {{post.country_name}}</div>
+
+                <p><span ng-bind-html-unsafe="post.message | stripHTML | nl2br"></span>... <a href="#/post/{{ post.id }}">[[[Read full]]]</a></p>
+
+                <hr />
             </div>
-            <div class="form-group">
-                <label for="location" class="col-xs-2 control-label">[[[Location]]]</label>
-                <div class="col-sm-10">
-                    <input class="form-control" id="location" ng-model="post.location"  typeahead-editable="false" typeahead-wait-ms="500" typeahead="location as location.town for location in getTowns($viewValue)" placeholder="[[[Location]]]">
-                </div>
-            </div>
-
-            <div class="form-group">
-
-                <div class="col-xs-12">
-                    <button type="submit" class="btn btn-primary pull-right">[[[Publish]]]</button>
-                    <a href="" class="btn btn-link pull-right">[[[Cancel]]]</a>
-                </div>
-            </div>
-        </form>
-
-        <div class="clearfix"></div>
-
-        <h3>[[[Latest entries]]]</h3>
-        <div ng-repeat="post in latestPosts">
-            <h4><span class="glyphicon glyphicon-calendar"></span> {{ post.when }}</h4>
-            <span class="glyphicon glyphicon-user"></span> <em>{{post.first_name}} {{ post.last_name }}</em>
-            <p><span ng-bind-html-unsafe="post.message | stripHTML | nl2br"></span>... <a href="#/post/{{ post.id }}">[[[Read full]]]</a></p>
-
-            <hr />
         </div>
 
     </div>
 
-    <div class="col-xs-4">
+    <div class="span-4">
 
         <h4>[[[Upcoming Runs]]]</h4>
         <div ng-repeat="run in upcomingRuns">
