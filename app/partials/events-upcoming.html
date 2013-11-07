@@ -1,0 +1,37 @@
+<div class="row">
+
+    <div class="col-xs-6">
+        <div class="input-group">
+            <a href="/#/events/create" class="btn btn-primary">[[[Add new event]]]</a>
+        </div>
+    </div>
+
+    <div class="col-xs-6">
+        <div class="input-group">
+            <input type="text" class="form-control">
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button">[[[Search]]]</button>
+            </span>
+        </div>
+    </div>
+
+
+</div>
+
+<table class="table">
+    <tr>
+        <th>[[[Name]]]</th>
+        <th>[[[Date]]]</th>
+        <th>[[[Distance]]]</th>
+        <th>[[[Location]]]</th>
+        <th x-signed-in>[[[Number of Friends Attending]]]</th>
+    </tr>
+
+    <tr ng-repeat="run in upcomingRuns">
+        <td>{{ run.date }}</td>
+        <td>{{ run.name }}</td>
+        <td>{{ run.distance }}</td>
+        <td>{{ run.town }}, {{ run.country }}</td>
+        <td x-signed-in>{{ run.friends_attending}}</td>
+    </tr>
+</table>

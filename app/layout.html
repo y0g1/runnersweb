@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en" ng-app="app">
+<head>
+  <meta charset="utf-8">
+  <title>Runners Web</title>
+  <link rel="stylesheet" href="css/app.css"/>
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="css/bootstrap-timepicker.min.css"/>
+    <link rel="stylesheet" href="css/toastr.min.css"/>
+</head>
+<body>
+    <nav class="navbar navbar-default navbar-static-top" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">[[[Menu]]]</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#/home">[[[Runners Web]]]</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+            <ul class="nav navbar-nav">
+                <li><a href="#/home">[[[Feed]]]</a></li>
+                <li><a href="#/feed">[[[My Entries]]]</a></li>
+                <li><a href="#/events/upcoming">[[[Upcoming Events]]]</a></li>
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li x-signed-out><a href="#/sign-in">[[[Sign In]]]</a></li>
+                <li x-signed-out><a href="#/sign-up">[[[Sign Up]]]</a></li>
+
+                <li class="dropdown" x-signed-in>
+                    <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">{{member.first_name}} {{member.last_name}}<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#/events/planned">[[[Planned Events]]]</a></li>
+                        <li><a href="#/my-account">[[[My Account]]]</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#/sign-out">[[[Log Out]]]</a></li>
+
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <div class="container" ng-view></div>
+
+    <!-- In production use:
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+    -->
+    <script src="lib/angular/angular.js"></script>
+    <script src="lib/angular/angular-route.js"></script>
+    <script src="lib/angular/angular-cookies.js"></script>
+    <script src="lib/jquery/jquery-2.0.3.min.js"></script>
+    <script src="lib/bootstrap/ui-bootstrap-0.7.0-SNAPSHOT.js"></script>
+    <script src="lib/bootstrap/ui-bootstrap-tpls-0.7.0-SNAPSHOT.js"></script>
+    <script src="lib/toastr/toastr.min.js"></script>
+    <script src="r/js/app.js"></script>
+    <script src="r/js/services.js"></script>
+    <script src="r/js/controllers.js"></script>
+    <script src="r/js/filters.js"></script>
+    <script src="r/js/directives.js"></script>
+</body>
+</html>
