@@ -12,6 +12,7 @@ var app = angular.module('app', [
 ]).
 
 config(['$routeProvider', '$locationProvider', '$sceProvider', function($routeProvider, $locationProvider, $sceProvider) {
+
     $routeProvider.when('/home', {templateUrl: 'r/partials/home.html', controller: 'HomeCtrl'});
     $routeProvider.when('/sign-in', {templateUrl: 'r/partials/sign-in.html', controller: 'SignInCtrl'});
     $routeProvider.when('/sign-out', {templateUrl: 'r/partials/sign-in.html', controller: 'SignOutCtrl'});
@@ -19,6 +20,8 @@ config(['$routeProvider', '$locationProvider', '$sceProvider', function($routePr
 
     $routeProvider.when('/events/upcoming', {templateUrl: 'r/partials/events-upcoming.html', controller: 'EventsUpcomingCtrl'});
     $routeProvider.when('/events/create', {templateUrl: 'r/partials/events-create.html', controller: 'EventsCreateCtrl'});
+
+    $routeProvider.when('/post/:post_id', {templateUrl: 'r/partials/post-show.html', controller: 'PostShowCtrl'});
 
 
     $routeProvider.otherwise({redirectTo: '/home'});

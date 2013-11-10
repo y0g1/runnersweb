@@ -16,6 +16,13 @@ angular.module('app.services', ['ngCookies'])
         console.log($cookieStore.get('member'));
         return {
 
+            getMember: function() {
+                if( typeof member == 'undefined') {
+                    return $rootScope.member;
+                }
+
+                return {id:-1};
+            },
             isLoggedIn: function(member) {
                 if(member === undefined)
                     member = $rootScope.member;

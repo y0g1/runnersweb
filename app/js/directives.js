@@ -46,7 +46,7 @@ angular.module('app.directives', []).
             });
         }
     }])
-    .directive('smartFloat', function() {
+    .directive('smartFloat', [function() {
         return {
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
@@ -61,4 +61,72 @@ angular.module('app.directives', []).
                 });
             }
         };
-    });
+    }])
+    .directive('comments', ['$rootScope', 'Auth', '$http', function($rootScope, Auth, $http) {
+        return {
+            restrict: 'E', /// element
+            templateUrl: '/r/partials/comments.html',
+            scope: {
+                postId: '@',
+                type: '@'
+            },
+
+            controller: ['Auth', '$scope', '$http', function(Auth, $scope, $http) {
+                $scope.sendComment = function() {
+                    $http({
+                        method: 'POST',
+                        url: '/comment/add',
+                        data : {type:$scope.type, id:$scope.postId, message:$scope.message}
+                    }).success(function(data) {
+                        toastr.success('[[[Comment has been added]]]');
+                        $scope.message = '';
+                        $scope.comments = $scope.getComments($scope.type, $scope.postId);
+                    });
+                };
+
+                $scope.deleteComment = function(id) {
+                    $http({
+                        method: 'POST',
+                        url: '/comment/delete',
+                        data : {type:$scope.type, id:id}
+                    }).success(function(data) {
+                        toastr.success('[[[Comment has been removed]]]');
+                        $scope.comments = $scope.getComments($scope.type, $scope.postId);
+                    });
+                };
+
+
+                $scope.getComments = function(type, id) {
+                    $http({
+                        method: 'POST',
+                        url: '/comment/get-list',
+                        data : {type:type, id:id}
+                    }).success(function(data) {
+                        $scope.comments = [];
+
+                        angular.forEach(data.res, function(com) {
+                            if(com.member_id == Auth.getMember().id) {
+                                com.isOwner = true;
+                            } else {
+                                com.isOwner = false;
+                            }
+                            $scope.comments.push(com);
+                        });
+                        //$scope.comments = data.res;
+                    });
+                };
+            }],
+            link: function(scope, element, attrs) {
+
+                scope.$watch('postId', function(val) {
+                    if( val!='' && parseInt(val) != 0) {
+                        scope.getComments(scope.type, val);
+                    }
+                });
+
+            }
+        }
+
+
+
+    }]);

@@ -1,0 +1,29 @@
+<div class="comments">
+
+    <h4>Comments</h4>
+    <div class="comment" ng-repeat="comment in comments">
+        <span ng-if="comment.deleted">
+            [[[Comment content deleted]]]
+        </span>
+        {{ comment.message }}
+        <br />
+        [[[by]]] {{ comment.member_name }} [[[posted on]]] {{ comment.when }}
+
+        <a ng-if="comment.isOwner && !comment.deleted" ng-click="deleteComment({{comment.id}})" href="javascript:void(0);">
+            [remove]
+        </a>
+    </div>
+
+    <div class="add-comment" x-signed-out>
+        [[[Sign in to add comments]]]
+    </div>
+
+    <div class="add-comment" x-signed-in>
+
+        <form ng-submit="sendComment()">
+            <input type="text" ng-model="message" placeholder="[[[Your comment]]]" />
+            <input type="submit" value="[[[Send]]]" />
+        </form>
+    </div>
+
+</div>

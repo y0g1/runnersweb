@@ -153,4 +153,26 @@ angular.module('app.controllers', []).
         $scope.createEvent = function() {
             toastr.error('Well, it`s not implemented yet. Sorry.');
         }
+    }]).
+    controller('PostShowCtrl', ['$scope', 'Auth', '$location', '$http', '$routeParams', function($scope, Auth, $location, $http, $routeParams) {
+
+        if(parseInt($routeParams.post_id) == 0) {
+            return false;
+        }
+
+        $http.get('/post/'+$routeParams.post_id).success(function(data) {
+
+            if(data.state == 0) {
+                $scope.post = data.res;
+                if(Auth.isLoggedIn() && $scope.post.member_id == Auth.getMember().id ) {
+                    $scope.post.isOwner = true;
+                } else {
+                    $scope.post.isOwner = false;
+                }
+
+            } else {
+                toastr.error(data.message);
+            }
+        });
     }]);
+

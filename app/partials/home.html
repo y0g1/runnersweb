@@ -49,6 +49,7 @@
                 <div ng-show="post.town">[[[in]]] {{post.town}} {{post.country_name}}</div>
 
                 <p><span ng-bind-html-unsafe="post.message | stripHTML | nl2br"></span>... <a href="#/post/{{ post.id }}">[[[Read full]]]</a></p>
+                <p ng-if="post.comments > 0"><a href="#/post/{{ post.id }}">{{post.comments}} [[[comments]]]</a></p>
 
                 <hr />
             </div>

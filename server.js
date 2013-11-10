@@ -84,15 +84,17 @@ app.get('/', function(req,res) {
 
 app.get('/post/list/global/:page', function(req,res) {
 
-    db.query('SELECT post.id, post.when, post.member_id, member.first_name, member.last_name, SUBSTRING_INDEX(post.message," ", 40) as message, post.location_id, location.town, country.name as country_name, workout.duration, workout.distance ' +
+    db.query('SELECT post.id, post.when, post.member_id, member.first_name, member.last_name, SUBSTRING_INDEX(post.message," ", 40) as message, post.location_id, location.town, country.name as country_name, workout.duration, workout.distance, COUNT(comment.id) as comments_count ' +
         'FROM post ' +
         'JOIN member ON (member.id=post.member_id) ' +
         'LEFT JOIN workout ON (post.workout_id=workout.id) ' +
         'LEFT JOIN location ON (post.location_id=location.id) ' +
         'LEFT JOIN country ON (location.country_id=country.id) ' +
+        'LEFT JOIN comment ON (comment.post_id=post.id AND comment.deleted_date IS NULL) ' +
+        'GROUP BY post.id ' +
         'ORDER BY id DESC ' +
         'LIMIT 20 OFFSET '+(20*(req.params.page-1)), function(err, rows, fields) {
-            if (err) throw err;
+            if (err) { res.send({state: 1, message: err}); return; }
             res.send({res: rows, state: 0});
         });
 
@@ -102,14 +104,16 @@ app.get('/post/list/friends/:page', function(req,res) {
     if( typeof req.session.member == 'undefined' && req.session.member != null) {
         res.send({state: 1, message: res.__('Please sign in or register first')});
     } else {
-        var query = 'SELECT post.id, post.when, post.member_id, member.first_name, member.last_name, SUBSTRING_INDEX(post.message," ", 40) as message, post.location_id, location.town, country.name as country_name, workout.duration, workout.distance  ' +
+        var query = 'SELECT post.id, post.when, post.member_id, member.first_name, member.last_name, SUBSTRING_INDEX(post.message," ", 40) as message, post.location_id, location.town, country.name as country_name, workout.duration, workout.distance, COUNT(comment.id) as comments  ' +
             'FROM post ' +
             'JOIN member ON (member.id=post.member_id) ' +
             'LEFT JOIN workout ON (post.workout_id=workout.id) ' +
             'LEFT JOIN following ON (followed_member_id=post.member_id AND follower_member_id='+req.session.member.id+') ' +
             'LEFT JOIN location ON (post.location_id=location.id) ' +
             'LEFT JOIN country ON (location.country_id=country.id) ' +
+            'LEFT JOIN comment ON (comment.post_id=post.id AND comment.deleted_date IS NULL) ' +
             'WHERE following.id IS NOT NULL OR post.member_id = ' + req.session.member.id + ' ' +
+            'GROUP BY post.id ' +
             'ORDER BY post.id DESC ' +
             'LIMIT 20 OFFSET '+(20*(req.params.page-1));
 
@@ -118,7 +122,7 @@ app.get('/post/list/friends/:page', function(req,res) {
         }
 
         db.query(query, function(err, rows, fields) {
-            if (err) throw err;
+            if (err) { res.send({state: 1, message: err}); return; }
             res.send({res: rows, state: 0});
         });
     }
@@ -176,7 +180,26 @@ app.post('/post/add', function(req,res) {
         }
 
     }
+});
 
+app.get('/post/:id', function(req,res) {
+    var query = 'SELECT post.id as post_id, post.message as message, post.`when` as `when`, CONCAT(member.first_name, \' \', member.last_name) as member_name, member.id as member_id ' +
+        'FROM post ' +
+        'JOIN member ON (post.member_id = member.id) ' +
+        'WHERE post.id='+req.params.id;
+
+    if(debugging) {
+        console.log(query);
+    }
+
+    db.query(query, [req.params.id],
+        function(err, rows, fields) {
+            if (err) { res.send({state: 1, message: err}); return; }
+
+            res.send({state: 0, res: rows[0]});
+
+        }
+    );
 });
 
 app.get('/events/upcoming/short', function(req,res) {
@@ -203,7 +226,7 @@ app.get('/events/upcoming/short', function(req,res) {
     }
 
     db.query(query, function(err, rows, fields) {
-        if (err) throw err;
+        if (err) { res.send({state: 1, message: err}); return; }
         res.send({res: rows, state: 0});
     });
 });
@@ -234,7 +257,7 @@ app.post('/events/upcoming', function(req,res) {
     }
 
     db.query(query, function(err, rows, fields) {
-        if (err) throw err;
+        if (err) { res.send({state: 1, message: err}); return; }
         res.send({res: rows, state: 0});
     });
 });
@@ -245,7 +268,7 @@ app.get('/api/me', function(req,res) {
         db.query('SELECT member.id, member.first_name, member.last_name, member.email ' +
             'FROM member ' +
             'WHERE member_id = ' + req.session.member.id, function(err, rows, fields) {
-            if (err) throw err;
+            if (err) { res.send({state: 1, message: err}); return; }
             res.send({res: rows[0], state: 0});
         });
     } else {
@@ -254,12 +277,85 @@ app.get('/api/me', function(req,res) {
 });
 
 
+app.post('/comment/get-list', function(req,res) {
+    if( req.body.type == 'post' ) {
+
+        var query = 'SELECT comment.id, comment.post_id, comment.`when`, comment.member_id, IF(comment.deleted_date IS NOT NULL, true, false) as deleted, IF(comment.deleted_date IS NOT NULL, \'\', comment.message) as message, CONCAT(member.first_name, \' \', member.last_name) as member_name, member.id as member_id ' +
+            'FROM comment ' +
+            'JOIN member ON (member.id = comment.member_id) ' +
+            'WHERE comment.post_id = ' + parseInt(req.body.id) +  ' ' +
+            'ORDER BY comment.id ASC';
+
+        if(debugging) {
+            console.log(query);
+        }
+
+        db.query(query, function(err, rows, fields) {
+            if (err) { res.send({state: 1, message: err}); return; }
+            res.send({res: rows, state: 0});
+        });
+    }
+});
+
+app.post('/comment/add', function(req,res) {
+
+    if( typeof req.session.member == 'undefined' || req.session.member == null ) {
+        res.send({message: '[[[Please log in to add comment]]]', state: 1});
+        return;
+    }
+
+    var query = 'INSERT INTO comment SET ?';
+
+    if(debugging) {
+        console.log(query);
+    }
+
+    if(req.body.message.length == 0) {
+        res.send({message: '[[[You forgot about the comment body]]]', state: 1});
+        return;
+    }
+
+    if(parseInt(req.body.id) == 0 || req.body.id == '') {
+        res.send({message: '[[[Please refresh the page and try adding again]]]', state: 1});
+        return;
+    }
+
+    if( req.body.type == 'post') {
+        db.query(query, {post_id:req.body.id, message:req.body.message, member_id:req.session.member.id, when:new Date()}, function(err, rows, fields) {
+            if (err) { res.send({state: 1, message: err}); return; }
+            res.send({res: rows, state: 0});
+        });
+    } else if( req.body.type == 'event') {
+        db.query(query, {event_id:req.body.id, message:req.body.message, member_id:req.session.member.id, when:new Date()}, function(err, rows, fields) {
+            if (err) { res.send({state: 1, message: err}); return; }
+            res.send({res: rows, state: 0});
+        });
+    }
+
+});
+
+app.post('/comment/delete', function(req,res) {
+
+    if( typeof req.session.member == 'undefined' || req.session.member == null ) {
+        res.send({message: '[[[Please log in to add comment]]]', state: 1});
+        return;
+    }
+
+    var query = 'UPDATE comment SET ? WHERE ? AND ?';
+    db.query(query, [{deleted_date:new Date()}, {id:req.body.id}, {member_id:req.session.member.id}], function(err, rows, fields) {
+        if (err) { res.send({state: 1, message: err}); return; }
+        res.send({state: 0});
+    });
+});
+
+
+
 app.post('/api/login', function(req,res) {
     db.query('SELECT member.id, member.first_name, member.last_name, member.email ' +
         'FROM member ' +
         'WHERE member.email = "' + req.param('login') + '" AND member.password="'+req.param('password')+'"'
         , function(err, rows, fields) {
-        if (err) throw err;
+        if (err) { res.send({state: 1, message: err}); return; }
         if(rows.length > 0){
             req.session.member = rows[0];
             res.send({res: rows[0], state: 0});
@@ -288,12 +384,9 @@ app.get('/api/location/:town', function(req,res) {
 
     db.query(query
         , function(err, rows, fields) {
-            if (err) throw err;
+            if (err) { res.send({state: 1, message: err}); return; }
 
             res.send(rows);
-
-
         });
-
 });
 
