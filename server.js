@@ -60,6 +60,9 @@ var translationFn = function(req,res) {
             return res.__(string);
         });
 
+        data = data.replace(/\$\{currentLanguage\}/g, res.getLocale());
+        console.log(res.getLocale());
+
         res.send(data);
     });
 }

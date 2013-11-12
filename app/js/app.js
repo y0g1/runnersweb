@@ -30,4 +30,6 @@ config(['$routeProvider', '$locationProvider', '$sceProvider', function($routePr
 
 app.run(function($rootScope, $http) {
 
+    moment.lang(vars.lang);
+
 });
