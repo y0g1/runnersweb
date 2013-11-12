@@ -1,10 +1,8 @@
 <div class="post-show">
 
-    <div>[[[Added]]] {{post.when}} [[[by]]] {{post.member_name}}</div>
+    <div>[[[Added]]] {{post.when | datetime}} [[[by]]] {{post.member_name}}</div>
 
-    <div>
-        {{post.message}}
-    </div>
+    <div ng-bind-html-unsafe="post.message | nl2br"></div>
 
     <comments post-id="{{post.post_id}}" type="post" />
 

@@ -42,7 +42,6 @@ angular.module('app.controllers', []).
         resetPost();
 
 
-
         $scope.getTowns = function(value) {
             return $http.get('/api/location/'+value).then(function(response){ return response.data; });
         };
@@ -61,8 +60,6 @@ angular.module('app.controllers', []).
 
         $scope.addPost = function(post) {
 
-
-            //console.log($scope.post);
             var data = {};
 
             data.duration = post.duration.getHours()*3600 + post.duration.getMinutes()*60 + post.duration.getSeconds();
@@ -90,6 +87,8 @@ angular.module('app.controllers', []).
                             toastr.error(data.message);
                         }
                     });
+                    $('.hp-post-details').removeClass('active');
+                    $('.hp-post-message').removeClass('active');
                     resetPost();
                 } else {
                     toastr.error(ret.message);
@@ -101,9 +100,6 @@ angular.module('app.controllers', []).
 
             console.log(data);
 
-//            if(success) {
-//
-//            }
         };
 
     }]).

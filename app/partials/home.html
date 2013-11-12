@@ -42,7 +42,7 @@
         <div class="row">
             <h3>[[[Latest entries]]]</h3>
             <div ng-repeat="post in latestPosts">
-                <h4><span class="glyphicon glyphicon-calendar"></span> {{ post.when }}</h4>
+                <h4><span class="glyphicon glyphicon-calendar"></span> {{ post.when | datetime }}</h4>
                 <span class="glyphicon glyphicon-user"></span> <em>{{post.first_name}} {{ post.last_name }}</em>
 
                 <div ng-show="post.duration">[[[ran]]] {{ post.distance }} [[[meters]]] [[[in]]] {{ post.duration }} [[[seconds]]]</div>
