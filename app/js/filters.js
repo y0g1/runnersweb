@@ -41,7 +41,7 @@ angular.module('app.filters', []).
         }
     }]).
     filter('datetime', [function() {
-        return function(text) {`
+        return function(text) {
             return moment.parseZone(text).format('LLLL');
         }
     }]).
