@@ -6,18 +6,12 @@ var express = require("express"),
     port = (process.env.PORT || 8001),
     app = server = module.exports = express(),
     mysql = require('mysql'),
+    dbConnection = require(__dirname + "/database"),
     fs = require('fs');
-
-var db = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'runnersweb',
-    password : 'runnersweb',
-    database : 'runnersweb'
-});
 
 var debugging = true;
 
-db.connect();
+var db = dbConnection.getConnection();
 
 
 i18n.configure({
