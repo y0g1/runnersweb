@@ -23,6 +23,8 @@ config(['$routeProvider', '$locationProvider', '$sceProvider', function($routePr
 
     $routeProvider.when('/post/:post_id', {templateUrl: 'r/partials/post-show.html', controller: 'PostShowCtrl'});
 
+    $routeProvider.when('/profile/:member_id', {templateUrl: 'r/partials/profile-page.html', controller: 'ProfilePageCtrl'});
+
 
     $routeProvider.otherwise({redirectTo: '/home'});
     $sceProvider.enabled(false);

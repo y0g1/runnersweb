@@ -41,18 +41,7 @@
 
         <div class="row">
             <h3>[[[Latest entries]]]</h3>
-            <div ng-repeat="post in latestPosts">
-                <h4><span class="glyphicon glyphicon-calendar"></span> {{ post.when | datetime }}</h4>
-                <span class="glyphicon glyphicon-user"></span> <em>{{post.first_name}} {{ post.last_name }}</em>
-
-                <div ng-show="post.duration">[[[ran]]] {{ post.distance }} [[[meters]]] [[[in]]] {{ post.duration }} [[[seconds]]]</div>
-                <div ng-show="post.town">[[[in]]] {{post.town}} {{post.country_name}}</div>
-
-                <p><span ng-bind-html-unsafe="post.message | stripHTML | nl2br"></span>... <a href="#/post/{{ post.id }}">[[[Read full]]]</a></p>
-                <p ng-if="post.comments > 0"><a href="#/post/{{ post.id }}">{{post.comments}} [[[comments]]]</a></p>
-
-                <hr />
-            </div>
+            <div ng-repeat="post in latestPosts" ng-include="'r/partials/_post-in-list.html'"></div>
         </div>
 
     </div>

@@ -80,5 +80,13 @@
 	"comments": "komentarze",
 	"Added": "Dodane",
 	"Your comment": "Twój komentarz",
-	"Send": "Wyślij"
+	"Send": "Wyślij",
+	"km": "km",
+	"hours": "hours",
+	"minutes": "minutes",
+	"during": "during",
+	"Post has been removed": "Post has been removed",
+	"Delete": "Delete",
+	"Post has been added successfully": "Post has been added successfully",
+	"My entries": "My entries"
 }

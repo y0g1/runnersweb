@@ -68,7 +68,9 @@ var translationFn = function(req,res) {
 }
 
 app.get('/r/:dir/:file', translationFn);
+
 app.get('/', function(req,res) {
+
     res.charset = 'utf-8';
     var member = '';
     if( typeof req.session.member != 'undefined') {
@@ -77,17 +79,31 @@ app.get('/', function(req,res) {
     res.cookie('member', JSON.stringify(member));
 
     translationFn(req,res);
+
 });
 
 app.get('/post/list/global/:page', function(req,res) {
 
-    db.query('SELECT post.id, post.when, post.member_id, member.first_name, member.last_name, SUBSTRING_INDEX(post.message," ", 40) as message, post.location_id, location.town, country.name as country_name, workout.duration, workout.distance, COUNT(comment.id) as comments_count ' +
+    db.query('SELECT ' +
+            'post.id, ' +
+            'post.`when`, ' +
+            'post.member_id, ' +
+            'member.first_name, ' +
+            'member.last_name, ' +
+            'IF( SUBSTRING_INDEX(post.message," ", 40) = post.message, post.message, CONCAT( SUBSTRING_INDEX(post.message," ", 40) , "...") ) as message, ' +
+            'post.location_id, ' +
+            'location.town, ' +
+            'country.name as country_name, ' +
+            'workout.duration, ' +
+            'workout.distance, ' +
+            'COUNT(comment.id) as comments_count ' +
         'FROM post ' +
         'JOIN member ON (member.id=post.member_id) ' +
         'LEFT JOIN workout ON (post.workout_id=workout.id) ' +
         'LEFT JOIN location ON (post.location_id=location.id) ' +
         'LEFT JOIN country ON (location.country_id=country.id) ' +
         'LEFT JOIN comment ON (comment.post_id=post.id AND comment.deleted_date IS NULL) ' +
+        'WHERE post.deleted_date IS NULL ' +
         'GROUP BY post.id ' +
         'ORDER BY id DESC ' +
         'LIMIT 20 OFFSET '+(20*(req.params.page-1)), function(err, rows, fields) {
@@ -98,10 +114,23 @@ app.get('/post/list/global/:page', function(req,res) {
 });
 
 app.get('/post/list/friends/:page', function(req,res) {
+
     if( typeof req.session.member == 'undefined' && req.session.member != null) {
         res.send({state: 1, message: res.__('Please sign in or register first')});
     } else {
-        var query = 'SELECT post.id, post.when, post.member_id, member.first_name, member.last_name, SUBSTRING_INDEX(post.message," ", 40) as message, post.location_id, location.town, country.name as country_name, workout.duration, workout.distance, COUNT(comment.id) as comments  ' +
+        db.query('SELECT ' +
+                'post.id, ' +
+                'post.`when`, ' +
+                'post.member_id, ' +
+                'member.first_name, ' +
+                'member.last_name, ' +
+                'IF( SUBSTRING_INDEX(post.message," ", 40) = post.message, post.message, CONCAT( SUBSTRING_INDEX(post.message," ", 40) , "...") ) as message, ' +
+                'post.location_id, ' +
+                'location.town, ' +
+                'country.name as country_name, ' +
+                'workout.duration, ' +
+                'workout.distance, ' +
+                'COUNT(comment.id) as comments_count ' +
             'FROM post ' +
             'JOIN member ON (member.id=post.member_id) ' +
             'LEFT JOIN workout ON (post.workout_id=workout.id) ' +
@@ -109,7 +138,47 @@ app.get('/post/list/friends/:page', function(req,res) {
             'LEFT JOIN location ON (post.location_id=location.id) ' +
             'LEFT JOIN country ON (location.country_id=country.id) ' +
             'LEFT JOIN comment ON (comment.post_id=post.id AND comment.deleted_date IS NULL) ' +
-            'WHERE following.id IS NOT NULL OR post.member_id = ' + req.session.member.id + ' ' +
+            'WHERE post.deleted_date IS NULL AND (following.id IS NOT NULL OR post.member_id = ' + req.session.member.id + ') ' +
+            'GROUP BY post.id ' +
+            'ORDER BY post.id DESC ' +
+            'LIMIT 20 OFFSET '+(20*(req.params.page-1)));
+
+        if(debugging) {
+            console.log(query);
+        }
+
+        db.query(query, function(err, rows, fields) {
+            if (err) { res.send({state: 1, message: err}); return; }
+            res.send({res: rows, state: 0});
+        });
+    }
+});
+
+app.get('/post/list/member/:memberId/:page', function(req,res) {
+
+    if( typeof req.session.member == 'undefined' && req.session.member != null) {
+        res.send({state: 1, message: res.__('Please sign in or register first')});
+    } else {
+        var query = 'SELECT ' +
+                'post.id, ' +
+                'post.`when`, ' +
+                'post.member_id, ' +
+                'member.first_name, ' +
+                'member.last_name, ' +
+                'post.message, ' +
+                'post.location_id, ' +
+                'location.town, ' +
+                'country.name as country_name, ' +
+                'workout.duration, ' +
+                'workout.distance, ' +
+                'COUNT(comment.id) as comments_count ' +
+            'FROM post ' +
+            'JOIN member ON (member.id=post.member_id) ' +
+            'LEFT JOIN workout ON (post.workout_id=workout.id) ' +
+            'LEFT JOIN location ON (post.location_id=location.id) ' +
+            'LEFT JOIN country ON (location.country_id=country.id) ' +
+            'LEFT JOIN comment ON (comment.post_id=post.id AND comment.deleted_date IS NULL) ' +
+            'WHERE post.deleted_date IS NULL AND post.member_id = ' + parseInt(req.params.memberId) + ' ' +
             'GROUP BY post.id ' +
             'ORDER BY post.id DESC ' +
             'LIMIT 20 OFFSET '+(20*(req.params.page-1));
@@ -175,15 +244,34 @@ app.post('/post/add', function(req,res) {
         } else {
             addPost();
         }
-
     }
+
+});
+
+app.post('/post/delete', function(req,res) {
+
+    if( typeof req.session.member == 'undefined' || req.session.member == null ) {
+        res.send({message: '[[[Please log in to delete post]]]', state: 1});
+        return;
+    }
+
+    var query = 'UPDATE post SET ? WHERE ? AND ?';
+    db.query(query, [{deleted_date:new Date()}, {id:req.body.id}, {member_id:req.session.member.id}], function(err, rows, fields) {
+        if (err) { res.send({state: 1, message: err}); return; }
+        res.send({state: 0});
+    });
+
 });
 
 app.get('/post/:id', function(req,res) {
-    var query = 'SELECT post.id as post_id, post.message as message, post.`when` as `when`, CONCAT(member.first_name, \' \', member.last_name) as member_name, member.id as member_id ' +
+
+    var query = 'SELECT post.id as post_id, post.message as message, post.`when` as `when`, CONCAT(member.first_name, \' \', member.last_name) as member_name, member.id as member_id, post.location_id, location.town, country.name as country_name, workout.duration, workout.distance ' +
         'FROM post ' +
         'JOIN member ON (post.member_id = member.id) ' +
-        'WHERE post.id='+req.params.id;
+        'LEFT JOIN workout ON (post.workout_id=workout.id) ' +
+        'LEFT JOIN location ON (post.location_id=location.id) ' +
+        'LEFT JOIN country ON (location.country_id=country.id) ' +
+        'WHERE post.deleted_date IS NULL AND post.id='+req.params.id;
 
     if(debugging) {
         console.log(query);
@@ -197,9 +285,11 @@ app.get('/post/:id', function(req,res) {
 
         }
     );
+
 });
 
 app.get('/events/upcoming/short', function(req,res) {
+
     if( typeof req.session.member != 'undefined'  && req.session.member != null ) {
         var query = 'SELECT event.id, event.name, location.town, country.name as country, COUNT(event_participant.event_id) as friends_attending ' +
             'FROM event ' +
@@ -226,10 +316,12 @@ app.get('/events/upcoming/short', function(req,res) {
         if (err) { res.send({state: 1, message: err}); return; }
         res.send({res: rows, state: 0});
     });
+
 });
 
 
 app.post('/events/upcoming', function(req,res) {
+
     if( typeof req.session.member != 'undefined'  && req.session.member != null ) {
         var query = 'SELECT event.id, event.name, event.description, location.town, country.name as country, COUNT(event_participant.event_id) as friends_attending ' +
             'FROM event ' +
@@ -257,10 +349,12 @@ app.post('/events/upcoming', function(req,res) {
         if (err) { res.send({state: 1, message: err}); return; }
         res.send({res: rows, state: 0});
     });
+
 });
 
 
 app.get('/api/me', function(req,res) {
+
     if( typeof req.session.member != 'undefined' && req.session.member != null) {
         db.query('SELECT member.id, member.first_name, member.last_name, member.email ' +
             'FROM member ' +
@@ -271,10 +365,12 @@ app.get('/api/me', function(req,res) {
     } else {
         res.send({state: 1});
     }
+
 });
 
 
 app.post('/comment/get-list', function(req,res) {
+
     if( req.body.type == 'post' ) {
 
         var query = 'SELECT comment.id, comment.post_id, comment.`when`, comment.member_id, IF(comment.deleted_date IS NOT NULL, true, false) as deleted, IF(comment.deleted_date IS NOT NULL, \'\', comment.message) as message, CONCAT(member.first_name, \' \', member.last_name) as member_name, member.id as member_id ' +
@@ -292,6 +388,7 @@ app.post('/comment/get-list', function(req,res) {
             res.send({res: rows, state: 0});
         });
     }
+
 });
 
 app.post('/comment/add', function(req,res) {
@@ -343,11 +440,13 @@ app.post('/comment/delete', function(req,res) {
         if (err) { res.send({state: 1, message: err}); return; }
         res.send({state: 0});
     });
+
 });
 
 
 
 app.post('/api/login', function(req,res) {
+
     db.query('SELECT member.id, member.first_name, member.last_name, member.email ' +
         'FROM member ' +
         'WHERE member.email = "' + req.param('login') + '" AND member.password="'+req.param('password')+'"'
@@ -361,11 +460,14 @@ app.post('/api/login', function(req,res) {
         }
 
     });
+
 });
 
 app.post('/api/logout', function(req,res) {
+
     req.session.member = null;
     res.send({state: 0});
+
 });
 
 app.get('/api/location/:town', function(req,res) {

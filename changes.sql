@@ -10,3 +10,6 @@ ALTER TABLE  `comment` CHANGE  `message`  `message` TEXT CHARACTER SET utf8 COLL
 
 -- 11/11/2013
 ALTER TABLE  `post` CHANGE  `message`  `message` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;
+
+-- 13/11/2013
+ALTER TABLE  `post` ADD  `deleted_date` DATETIME NULL DEFAULT NULL

@@ -2,8 +2,15 @@
 
     <div>[[[Added]]] {{post.when | datetime}} [[[by]]] {{post.member_name}}</div>
 
+    <div ng-show="post.duration">[[[ran]]] {{ post.distance/1000 }} [[[km]]] [[[during]]] <span ng-if="post.duration/3600 > 1"> {{ post.duration/3600 }} [[[hours]]]</span>{{ post.duration/60 | number:0 }} [[[minutes]]] <span ng-if="post.duration % 60 != 0"> {{ post.duration % 60 }} [[[seconds]]]</span></div>
+    <div ng-show="post.town">[[[in]]] {{post.town}} {{post.country_name}}</div>
+
     <div ng-bind-html-unsafe="post.message | nl2br"></div>
 
+    <a ng-if="member.id && post.member_id == member.id" ng-click="deletePost(post.id)">[[[Delete]]]</a>
+
     <comments post-id="{{post.post_id}}" type="post" />
+
+
 
 </div>
