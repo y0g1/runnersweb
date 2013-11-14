@@ -140,7 +140,7 @@ app.get('/post/list/friends/:page', function(req,res) {
     if( typeof req.session.member == 'undefined' && req.session.member != null) {
         res.send({state: 1, message: res.__('Please sign in or register first')});
     } else {
-        db.query('SELECT ' +
+        var query = 'SELECT ' +
                 'post.id, ' +
                 'post.`when`, ' +
                 'post.member_id, ' +
@@ -163,7 +163,8 @@ app.get('/post/list/friends/:page', function(req,res) {
             'WHERE post.deleted_date IS NULL AND (following.id IS NOT NULL OR post.member_id = ' + req.session.member.id + ') ' +
             'GROUP BY post.id ' +
             'ORDER BY post.id DESC ' +
-            'LIMIT 20 OFFSET '+(20*(req.params.page-1)));
+            'LIMIT 20 OFFSET '+(20*(req.params.page-1));
+
 
         if(debugging) {
             console.log(query);
