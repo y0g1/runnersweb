@@ -88,5 +88,11 @@
 	"Post has been removed": "Post has been removed",
 	"Delete": "Delete",
 	"Post has been added successfully": "Post has been added successfully",
-	"My entries": "My entries"
+	"My entries": "My entries",
+	"Edit": "Edit",
+	"Save": "Save",
+	"Post has been added updated": "Post has been added updated",
+	"Are you sure?": "Are you sure?",
+	"Are you sure that you want to remove this post?": "Are you sure that you want to remove this post?",
+	"Are you sure that you want to remove this comment?": "Are you sure that you want to remove this comment?"
 }

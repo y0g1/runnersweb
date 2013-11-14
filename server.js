@@ -83,7 +83,11 @@ var translationFn = function(req,res) {
         });
 
         data = data.replace(/\$\{currentLanguage\}/g, res.getLocale());
-        console.log(res.getLocale());
+        if(req.session.member) {
+            data = data.replace(/\$\{member\}/g, JSON.stringify(req.session.member));
+        } else {
+            data = data.replace(/\$\{member\}/g, '{id:-1}');
+        }
 
         res.send(data);
     });
@@ -137,7 +141,7 @@ app.get('/post/list/global/:page', function(req,res) {
 
 app.get('/post/list/friends/:page', function(req,res) {
 
-    if( typeof req.session.member == 'undefined' && req.session.member != null) {
+    if( typeof req.session.member == 'undefined' || req.session.member == null) {
         res.send({state: 1, message: res.__('Please sign in or register first')});
     } else {
         var query = 'SELECT ' +
@@ -179,7 +183,7 @@ app.get('/post/list/friends/:page', function(req,res) {
 
 app.get('/post/list/member/:memberId/:page', function(req,res) {
 
-    if( typeof req.session.member == 'undefined' && req.session.member != null) {
+    if( typeof req.session.member == 'undefined' || req.session.member == null) {
         res.send({state: 1, message: res.__('Please sign in or register first')});
     } else {
         var query = 'SELECT ' +
@@ -219,7 +223,7 @@ app.get('/post/list/member/:memberId/:page', function(req,res) {
 
 app.post('/post/add', function(req,res) {
 
-    if( typeof req.session.member == 'undefined' && req.session.member != null) {
+    if( typeof req.session.member == 'undefined' || req.session.member == null) {
         res.send({state: 1, message: res.__('Please sign in or register first')});
     } else {
 
@@ -271,9 +275,98 @@ app.post('/post/add', function(req,res) {
 
 });
 
+
+app.post('/post/save', function(req,res) {
+
+    if( typeof req.session.member == 'undefined' || req.session.member == null) {
+        res.send({state: 1, message: res.__('Please sign in or register first')});
+    } else {
+
+
+        var updatePost= function(workoutId) {
+            var query = 'UPDATE post SET ? WHERE ? AND ?';
+            if(debugging) {
+                console.log(query);
+            }
+
+//            if( typeof workoutId == 'undefined') {
+//                workoutId = 'NULL';
+//            }
+
+            db.query(query, [{message:req.body.message, workout_id:workoutId, location_id:req.body.location, when:new Date()}, {member_id:req.session.member.id}, {id:req.body.id }], function(err, rows, fields) {
+                console.log(err);
+                res.send({state: 0});
+            });
+        };
+        var addWorkout = function(form, callback) {
+            var location = parseInt(form.location) == 0 ? 'NULL' : parseInt(form.location),
+                distance = parseInt(form.distance) == 0 ? 'NULL' : parseInt(form.distance),
+                duration = parseInt(form.duration) == 0 ? 'NULL' : parseInt(form.duration);
+
+            //var query = 'INSERT INTO workout (`when`, distance, duration, member_id, location_id) VALUES (NOW(), '+distance+','+duration+', '+req.session.member.id+','+location+')';
+            var query = 'INSERT INTO workout SET ?';
+
+            if(debugging) {
+                console.log(query);
+            }
+            db.query(query, {member_id:req.session.member.id, when:new Date(), distance: form.distance, location_id:form.location, duration:form.duration}, function(err, rows, fields) {
+                console.log(err);
+
+                var query = 'SELECT LAST_INSERT_ID() as workoutId';
+                if(debugging) {
+                    console.log(query);
+                }
+                db.query(query, function(err, rows, fields) {
+                    console.log(err);
+                    if(typeof callback != 'undefined') {
+                        callback(rows[0].workoutId);
+                    }
+                });
+            });
+        };
+        var updateWorkout = function(id, form, callback) {
+            var location = parseInt(form.location) == 0 ? 'NULL' : parseInt(form.location),
+                distance = parseInt(form.distance) == 0 ? 'NULL' : parseInt(form.distance),
+                duration = parseInt(form.duration) == 0 ? 'NULL' : parseInt(form.duration);
+
+            //var query = 'INSERT INTO workout (`when`, distance, duration, member_id, location_id) VALUES (NOW(), '+distance+','+duration+', '+req.session.member.id+','+location+')';
+            var query = 'UPDATE workout SET ? WHERE ?';
+
+            if(debugging) {
+                console.log(query);
+            }
+            db.query(query, [{member_id:req.session.member.id, when:new Date(), distance: form.distance, location_id:form.location, duration:form.duration}, {id:id}], function(err, rows, fields) {
+
+                callback(id);
+            });
+        };
+
+
+        db.query('SELECT workout_id FROM post WHERE ?', {id:req.body.id, member_id:req.session.member.id}, function(resp) {
+
+            if( parseInt(req.body.distance) == 0 && parseInt(req.body.duration) == 0) {
+                updatePost();
+            } else if(resp.length > 0) {
+                var workoutId = resp[0].workout_id;
+
+                updateWorkout(workoutId, req.body, function() {
+                    updatePost(workoutId);
+                });
+            } else {
+                addWorkout(req.body, function(workoutId) {
+                    updatePost(workoutId);
+                });
+            }
+        });
+
+
+    }
+
+});
+
 app.post('/post/delete', function(req,res) {
 
-    if( typeof req.session.member == 'undefined' || req.session.member == null ) {
+    if( typeof req.session.member == 'undefined' || req.session.member == null) {
         res.send({message: '[[[Please log in to delete post]]]', state: 1});
         return;
     }

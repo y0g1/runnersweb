@@ -10,8 +10,9 @@ angular.module('app.services', ['ngCookies'])
 
     .factory('Auth', ['$http','$rootScope', '$cookieStore', function($http, $rootScope, $cookieStore){
 
-        $rootScope.member = $cookieStore.get('member') || {};
+        //$rootScope.member = $cookieStore.get('member') || {};
 
+        $rootScope.member = vars.member || {};
 
         return {
 
@@ -23,10 +24,10 @@ angular.module('app.services', ['ngCookies'])
                 return {id:-1};
             },
             isLoggedIn: function(member) {
-                if(member === undefined)
+                if(member === undefined )
                     member = $rootScope.member;
 
-                return typeof member.id != 'undefined';
+                return (typeof member.id != 'undefined' && member.id > -1);
             },
 
             register: function(member, success, error) {
@@ -139,6 +140,34 @@ angular.module('app.services', ['ngCookies'])
 
             },
 
+            save: function(post, callback) {
+
+                var data = {};
+
+                data.id = post.post_id;
+
+                data.duration = post.duration.getHours()*3600 + post.duration.getMinutes()*60 + post.duration.getSeconds();
+                data.message = post.message;
+                data.distance = post.distance * 1000;
+
+                if( post.location ) {
+                    data.location = post.location.id;
+                }
+
+                $http.post('/post/save', data).success( function(ret) {
+
+                    if(ret.state == 0) {
+                        callback();
+                    } else {
+                        toastr.error(ret.message);
+                    }
+
+                }).error( function() {
+                    toastr.error('[[[There was a problem adding your post. Please try again.]]]');
+                });
+
+            },
+
             delete: function(id, callback) {
 
                 $http({
@@ -154,4 +183,16 @@ angular.module('app.services', ['ngCookies'])
         };
 
 
+    }])
+    .factory('Town', ['$http', function($http){
+
+        return {
+
+            getList: function(value) {
+
+                return $http.get('/api/location/'+value).then(function(response){ return response.data; });
+
+            }
+        }
     }]);
+

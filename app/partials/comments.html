@@ -9,8 +9,8 @@
         <br />
         [[[by]]] {{ comment.member_name }} [[[posted on]]] {{ comment.when }}
 
-        <a ng-if="comment.isOwner && !comment.deleted" ng-click="deleteComment({{comment.id}})" href="javascript:void(0);">
-            [remove]
+        <a ng-if="comment.isOwner && !comment.deleted" confirmed-click="deleteComment({{comment.id}})" ng-confirm-click="[[[Are you sure that you want to remove this comment?]]] href="javascript:void(0);">
+            [[[Delete]]]
         </a>
     </div>
 

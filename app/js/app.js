@@ -22,6 +22,7 @@ config(['$routeProvider', '$locationProvider', '$sceProvider', function($routePr
     $routeProvider.when('/events/create', {templateUrl: 'r/partials/events-create.html', controller: 'EventsCreateCtrl'});
 
     $routeProvider.when('/post/:post_id', {templateUrl: 'r/partials/post-show.html', controller: 'PostShowCtrl'});
+    $routeProvider.when('/post/edit/:post_id', {templateUrl: 'r/partials/post-edit.html', controller: 'PostEditCtrl'});
 
     $routeProvider.when('/profile/:member_id', {templateUrl: 'r/partials/profile-page.html', controller: 'ProfilePageCtrl'});
 
@@ -30,7 +31,7 @@ config(['$routeProvider', '$locationProvider', '$sceProvider', function($routePr
     $sceProvider.enabled(false);
 }]);
 
-app.run(function($rootScope, $http) {
+app.run(function() {
 
     moment.lang(vars.lang);
 

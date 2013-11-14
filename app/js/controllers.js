@@ -4,7 +4,7 @@
 
 angular.module('app.controllers', []).
 
-    controller('HomeCtrl', ['$scope', '$http', 'Auth', 'Post', function($scope, $http, Auth, Post) {
+    controller('HomeCtrl', ['$scope', '$http', 'Auth', 'Post', 'Town', function($scope, $http, Auth, Post, Town) {
 
         /**
          * ==================== POSTS =========================
@@ -39,6 +39,8 @@ angular.module('app.controllers', []).
         $scope.deletePost = function(id) { Post.delete(id, function() { removePostFromScope(id); }); };
 
         $scope.addPost = function(post) {
+
+            console.log(post);
 
             Post.add(post, function() {
                 toastr.success('[[[Post has been added successfully]]]');
@@ -79,9 +81,7 @@ angular.module('app.controllers', []).
          * ==================== TOWNS =========================
          */
 
-        $scope.getTowns = function(value) {
-            return $http.get('/api/location/'+value).then(function(response){ return response.data; });
-        };
+        $scope.getTowns = Town.getList;
 
     }]).
 
@@ -132,6 +132,41 @@ angular.module('app.controllers', []).
                 location.href='#/';
             });
         };
+
+    }]).
+
+    controller('PostEditCtrl', ['$scope', '$routeParams', 'Post', 'Town', function($scope, $routeParams, Post, Town) {
+
+        var id = parseInt($routeParams.post_id);
+
+        if(id == 0) {
+            return false;
+        }
+
+        Post.get(id, function(data) {
+
+            data.location = {
+                id: data.location_id,
+                town: data.town+', '+data.country_name
+            };
+
+            data.distance = (data.distance / 1000).toFixed(3);
+
+            var seconds = data.duration;
+            data.duration = new Date(0, 0, 0, Math.floor(seconds/3600), (seconds % 3600 / 60), seconds % 60, 0);
+
+            $scope.post = data;
+        });
+
+        $scope.savePost = function(post) {
+            Post.save(post, function() {
+                toastr.success('[[[Post has been added updated]]]');
+                location.href='#/post/'+id;
+            });
+        };
+
+
+        $scope.getTowns = Town.getList;
 
     }]).
 
