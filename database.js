@@ -24,9 +24,21 @@ module.exports.getConnection = function() {
     });
     connection.on("close", function (err) {
         console.log("SQL CONNECTION CLOSED.");
+
+        console.log('Re-connecting lost connection');
+        connection.destroy();
+        connection = mysql.createConnection(config.mysql);
+        handleDisconnect(connection);
+        connection.connect();
     });
     connection.on("error", function (err) {
         console.log("SQL CONNECTION ERROR: " + err);
+
+        console.log('Re-connecting lost connection');
+        connection.destroy();
+        connection = mysql.createConnection(config.mysql);
+        handleDisconnect(connection);
+        connection.connect();
     });
     module.exports.connection = connection;
     return module.exports.connection;

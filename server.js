@@ -6,12 +6,34 @@ var express = require("express"),
     port = (process.env.PORT || 8001),
     app = server = module.exports = express(),
     mysql = require('mysql'),
-    dbConnection = require(__dirname + "/database"),
     fs = require('fs');
 
 var debugging = true;
 
-var db = dbConnection.getConnection();
+var config = {
+    mysql : {
+        host     : 'localhost',
+        user     : 'runnersweb',
+        password : 'runnersweb',
+        database : 'runnersweb'
+    }
+}
+
+function handleDisconnect(myconnection) {
+    myconnection.on('error', function(err) {
+        console.log('Re-connecting lost connection');
+        connection.destroy();
+        connection = mysql.createConnection(config.mysql);
+        handleDisconnect(connection);
+        connection.connect();
+    });
+}
+
+var db = mysql.createConnection(config.mysql);
+handleDisconnect(db);
+
+//var db = connection.getConnection();
+
 
 
 i18n.configure({
