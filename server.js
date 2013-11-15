@@ -22,10 +22,10 @@ var config = {
 function handleDisconnect(myconnection) {
     myconnection.on('error', function(err) {
         console.log('Re-connecting lost connection');
-        connection.destroy();
-        connection = mysql.createConnection(config.mysql);
-        handleDisconnect(connection);
-        connection.connect();
+        myconnection.destroy();
+        myconnection = mysql.createConnection(config.mysql);
+        handleDisconnect(myconnection);
+        myconnection.connect();
     });
 }
 
