@@ -1,4 +1,8 @@
 <div class="row" x-signed-in>
+
+
+    <a href="javascript:history.back()" class="btn btn-small mb"><i class="icon-chevron-left"></i>[[[back]]]</a>
+
     <form class="form-horizontal" class="hp" ng-submit="savePost(post)" >
         <div class="control-group">
             <textarea required class="form-control span8 hp-post-message active" ng-focus="showFullForm()" ng-model="post.message" placeholder="[[[How was your running today?]]]"></textarea>
@@ -27,10 +31,10 @@
                 </div>
             </div>
 
-            <div class="row">
+            <div class="">
 
                 <button type="submit" ng-disabled="form.$invalid || isUnchanged(user)" class="btn btn-primary pull-right">[[[Save]]]</button>
-                <a href="#/post/{{post.post_id}}" class="btn btn-link pull-right">[[[Cancel]]]</a>
+
             </div>
         </div>
     </form>

@@ -30,6 +30,11 @@ angular.module('app.filters', []).
         }
 
     }]).
+    filter('trim', [function() {
+        return function(text) {
+            return $.trim(text);
+        }
+    }]).
     filter('date', [function() {
         return function(text) {
             return moment.parseZone(text).format('LL');

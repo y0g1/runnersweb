@@ -293,7 +293,7 @@ app.post('/post/save', function(req,res) {
 //                workoutId = 'NULL';
 //            }
 
-            db.query(query, [{message:req.body.message, workout_id:workoutId, location_id:req.body.location, when:new Date()}, {member_id:req.session.member.id}, {id:req.body.id }], function(err, rows, fields) {
+            db.query(query, [{message:req.body.message, workout_id:workoutId, location_id:req.body.location}, {member_id:req.session.member.id}, {id:req.body.id }], function(err, rows, fields) {
                 console.log(err);
                 res.send({state: 0});
             });
@@ -309,7 +309,7 @@ app.post('/post/save', function(req,res) {
             if(debugging) {
                 console.log(query);
             }
-            db.query(query, {member_id:req.session.member.id, when:new Date(), distance: form.distance, location_id:form.location, duration:form.duration}, function(err, rows, fields) {
+            db.query(query, {member_id:req.session.member.id, when:new Date(), distance: distance, location_id:location, duration:duration}, function(err, rows, fields) {
                 console.log(err);
 
                 var query = 'SELECT LAST_INSERT_ID() as workoutId';
@@ -335,7 +335,7 @@ app.post('/post/save', function(req,res) {
             if(debugging) {
                 console.log(query);
             }
-            db.query(query, [{member_id:req.session.member.id, when:new Date(), distance: form.distance, location_id:form.location, duration:form.duration}, {id:id}], function(err, rows, fields) {
+            db.query(query, [{member_id:req.session.member.id, distance: distance, location_id:location, duration:duration}, {id:id}], function(err, rows, fields) {
 
                 callback(id);
             });

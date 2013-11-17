@@ -1,7 +1,7 @@
 <div class="row">
     <div class="span8">
 
-        <div class="row" x-signed-in>
+        <div class="" x-signed-in>
             <form class="form-horizontal" class="hp" ng-submit="addPost(post)" >
                 <div class="control-group">
                     <textarea required class="form-control span8 hp-post-message" ng-focus="showFullForm()" ng-model="post.message" placeholder="[[[How was your running today?]]]"></textarea>
@@ -14,8 +14,8 @@
                         </div>
                     </div>
                     <div class="clearfix"></div>
-                    <div class="control-group">
-                        <label  class="control-label">[[[Duration]]]</label>
+                    <div class="control-group" style="margin-bottom:0;">
+                        <label style="margin-top:35px;" class="control-label">[[[Duration]]]</label>
                         <div class="controls">
                             <div ng-model="post.duration" class="bootstrap-timepicker" style="display:inline-block;">
                                 <timepicker hour-step="1" minute-step="1" show-seconds="true" show-meridian="false"></timepicker>
@@ -31,22 +31,21 @@
                     </div>
 
                     <div class="row">
-
-                            <button type="submit" ng-disabled="form.$invalid || isUnchanged(user)" class="btn btn-primary pull-right">[[[Publish]]]</button>
-                            <a ng-click="cancelPost()" class="btn btn-link pull-right">[[[Cancel]]]</a>
+                        <button type="submit" ng-disabled="form.$invalid || isUnchanged(user)" class="btn btn-primary pull-right">[[[Publish]]]</button>
+                        <a ng-click="cancelPost()" class="btn btn-link pull-right">[[[Cancel]]]</a>
                     </div>
                 </div>
             </form>
         </div>
 
-        <div class="row">
+        <div class="">
             <h3>[[[Latest entries]]]</h3>
             <div ng-repeat="post in latestPosts" ng-include="'r/partials/_post-in-list.html'"></div>
         </div>
 
     </div>
 
-    <div class="span-4">
+    <div class="span4">
 
         <h4>[[[Upcoming Runs]]]</h4>
         <div ng-repeat="run in upcomingRuns">
@@ -61,7 +60,7 @@
             <div ng-repeat="activity in latestActivities">
 
             </div>
-            <a href="#/activity">[[[All activities]]]</a>
+            <a href="#/events/upcoming">[[[All runs]]]</a>
         </div>
     </div>
 </div>

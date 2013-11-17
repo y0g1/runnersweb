@@ -12,4 +12,6 @@ body { overflow-y: scroll; }
         .hp-post-message.active { height: 80px; }
 
 
-/** bootstrap overwrites */
+.mb { margin-bottom: 10px; }
+.mb-l { margin-bottom: 20px; }
+.mb-xl { margin-bottom: 40px; }

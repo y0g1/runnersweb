@@ -1,16 +1,23 @@
-<h4><span class="glyphicon glyphicon-calendar"></span> {{ post.when | datetime }}</h4>
-<span class="glyphicon glyphicon-user"></span> <em>{{post.first_name}} {{ post.last_name }}</em>
+<h4><i class="icon-calendar"></i> {{ post.when | datetime }}</h4>
 
-<div ng-show="post.duration">[[[ran]]] {{ post.distance/1000 }} [[[km]]] [[[during]]] <span ng-if="post.duration/3600 > 1"> {{ post.duration/3600 | number:0}} [[[hours]]]</span> {{ (post.duration % 3600 )/60 | number:0 }} [[[minutes]]] <span ng-if="post.duration % 60 != 0"> {{ post.duration % 60 }} [[[seconds]]]</span></div>
-<div ng-show="post.town">[[[in]]] {{post.town}} {{post.country_name}}</div>
+<div class="alert alert-info">
+    <span class="icon-user"></span>{{post.first_name}} {{ post.last_name }}
+    <span ng-show="post.duration">
+        <i class="icon-road"></i>{{ post.distance/1000 }} [[[km]]]
+        <i class="icon-time"></i><span ng-if="post.duration/3600 > 1">{{ post.duration/3600 | number:0}} [[[hours]]]</span> {{ (post.duration % 3600 )/60 | number:0 }} [[[minutes]]] <span ng-if="post.duration % 60 != 0"> {{ post.duration % 60 }} [[[seconds]]]</span>
+    </span>
+    <span ng-show="post.town"><i class="icon-map-marker"></i>{{post.town}}, {{post.country_name}}</span>
+</div>
 
-<p><span ng-bind-html-unsafe="post.message | stripHTML | nl2br"></span> <a href="#/post/{{ post.id }}">[[[Read full]]]</a></p>
+<div ng-if="member.id && post.member_id == member.id" class="post-edit btn-group pull-right">
+    <a class="btn btn-mini" href="#/post/edit/{{post.id}}">[[[Edit]]]</a>
+    <a class="btn btn-mini" confirmed-click="deletePost(post.id)" ng-confirm-click="[[[Are you sure that you want to remove this post?]]]" >[[[Delete]]]</a>
+</div>
+
+<p><span ng-bind-html-unsafe="post.message | stripHTML | nl2br | trim"></span> <a href="#/post/{{ post.id }}">[[[Read full]]]</a></p>
 <p ng-if="post.comments > 0"><a href="#/post/{{ post.id }}">{{post.comments}} [[[comments]]]</a></p>
 
-<div ng-if="member.id && post.member_id == member.id">
-    <a href="#/post/edit/{{post.id}}">[[[Edit]]]</a>
-    <a confirmed-click="deletePost(post.id)" ng-confirm-click="[[[Are you sure that you want to remove this post?]]]" >[[[Delete]]]</a>
-</div>
+
 
 
 <hr />

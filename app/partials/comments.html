@@ -21,8 +21,8 @@
     <div class="add-comment" x-signed-in>
 
         <form ng-submit="sendComment()">
-            <input type="text" ng-model="message" placeholder="[[[Your comment]]]" />
-            <input type="submit" value="[[[Send]]]" />
+            <textarea ng-model="message" placeholder="[[[Your comment]]]"></textarea>
+            <input type="submit" class="btn" value="[[[Send]]]" />
         </form>
     </div>
 

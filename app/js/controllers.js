@@ -170,9 +170,15 @@ angular.module('app.controllers', []).
 
     }]).
 
-    controller('SignUpCtrl', [function() {
+    controller('SignUpCtrl', ['$scope', 'Auth', function($scope, Auth) {
 
-        toastr.error('Be aware that registering is now working yet.');
+        toastr.error('Be aware that registering is not working yet.');
+
+        $scope.signup = function() {
+
+            Auth.register($scope.member);
+
+        };
 
     }]).
 
